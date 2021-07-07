@@ -2,9 +2,9 @@ import requests
 from requests import api
 
 CACHI_LOCATION= {
-    "lat":9.8293,
-    "lon":-83.7941,
-    "zip":"30204,cr"
+    "lat":0,
+    "lon":0,
+    "zip":""
 }
 
 def get_current_weather():
