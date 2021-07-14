@@ -1,16 +1,21 @@
 ## Libraries
 import RPi.GPIO as GPIO
 import time
+import multiprocessing
 
 from globalvariables import RASPBERRY_PINS, CHARACTERS
 
-class DisplayController:
+class DisplayController(multiprocessing.Process):
 	def __init__(self):
+		multiprocessing.Process.__init__(self)
 		self.digit_characters = [' ', ' ', 'Degree', 'A']
 		self.mode = False
 		self.turnFan(False)
 
 	def resetDisplay(self):
+		'''
+		Resets the display for display operation
+		'''
 		if GPIO.getmode() != 11:
 			GPIO.setmode(GPIO.BCM)
 
@@ -42,17 +47,17 @@ class DisplayController:
 		elif digit == 'D4':
 			self.digit_characters[3] = character
 
-	def setMode(self):
+	def setMode(self, value):
 		'''
 		Sets the mode for the information that it is being shown
 		False: Temperature
 		True: Humidity
 		'''
+		self.mode = value
 		if self.mode:
 			self.setCharacter('H','D3')
 		else:
 			self.setCharacter('Degree', 'D3')
-		self.mode = not self.mode
 
 	def turnFan(self, on):
 		'''
@@ -71,7 +76,7 @@ class DisplayController:
 		Increase: True, H: high potency
 		Decrease: False, turnFan function is called
 		'''
-		if increase:
+		if increase and on:
 			self.setCharacter('H', 'D4')
 		else:
 			self.turnFan(on)
@@ -88,19 +93,26 @@ class DisplayController:
 		'''
 		Displays each character
 		'''
-#		try:
-#			while True:
 		self.resetDisplay()
-		for digit in range(4):
-			GPIO.output(self.digits[digit], 0)
-			for segment in range(8):
-				character = self.digit_characters[digit]
-				GPIO.output(self.segments[segment], CHARACTERS[character][segment])
-			GPIO.output(self.digits[digit], 1)
-			time.sleep(0.001)
-			GPIO.output(self.digits[digit], 0)
-#		except:
-#			print('Error on the display')
+		try:
+			while True:
+				for digit in range(4):
+					GPIO.output(self.digits[digit], 0)
+					for segment in range(8):
+						character = self.digit_characters[digit]
+						GPIO.output(self.segments[segment], CHARACTERS[character][segment])
+					GPIO.output(self.digits[digit], 1)
+					time.sleep(0.001)
+					GPIO.output(self.digits[digit], 0)
+		except KeyboardInterrupt:
+			GPIO.cleanup()
+
+	def run(self):
+		'''
+		Runs the process
+		'''
+		self.display()
+		return
 
 	def onDestroy(self):
 		'''

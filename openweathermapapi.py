@@ -1,11 +1,8 @@
 import requests
 from requests import api
 
-CACHI_LOCATION= {
-    "lat":0,
-    "lon":0,
-    "zip":""
-}
+from globalvariables import CACHI_LOCATION, API_KEY
+
 
 def get_current_weather():
     '''
@@ -20,11 +17,10 @@ def get_current_weather():
 
 class OpenWeatherApi:
     def __init__(self):
-        self.app_id=''
-        self.api_url = (f'https://api.openweathermap.org/data/2.5/weather?zip={CACHI_LOCATION["zip"]}&appid={self.app_id}')
+        self.api_url = (f'https://api.openweathermap.org/data/2.5/weather?zip={CACHI_LOCATION["zip"]}&appid={API_KEY}')
         self.weather_dict = dict()
 
-    def request_to_api(self):
+    def requestToApi(self):
         '''
         Creates the request to the API to retrieve the weather information
         '''
@@ -33,13 +29,13 @@ class OpenWeatherApi:
             raise Exception(f'Error - Error Code:{response_weather.status_code} - Message: {response_weather.text}')
         return response_weather.json()
     
-    def refresh_weather(self):
+    def refreshWeather(self):
         '''
         Refreshes the weather dictionary with the api
         '''
-        self.weather_dict = self.request_to_api()
+        self.weather_dict = self.requestToApi()
 
-    def get_temperatures(self):
+    def getTemperatures(self):
         '''
         Returns the temperatures recorded in the weather dictionary
         '''
@@ -47,7 +43,7 @@ class OpenWeatherApi:
         feels_like = round(self.weather_dict['main']['feels_like']-273.5,2)
         return (temperature, feels_like)
     
-    def get_humidity(self):
+    def getHumidity(self):
         '''
         Returns the humidity recorded in the weather dictionary
         '''
@@ -55,10 +51,10 @@ class OpenWeatherApi:
 
 # Example of how to use the class to get temperatures
 api_object = OpenWeatherApi()
-api_object.refresh_weather()
-(temperature, feels_like) = api_object.get_temperatures()
+api_object.refreshWeather()
+(temperature, feels_like) = api_object.getTemperatures()
 print(f'Temperature = {temperature}|Feels Like = {feels_like}')
-humidity = api_object.get_humidity()
+humidity = api_object.getHumidity()
 print(f'Humidity= {humidity}')
 # Gets all the weather object
 #get_current_weather()
